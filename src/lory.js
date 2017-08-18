@@ -96,6 +96,49 @@ export function lory (slider, opts) {
     }
 
     /**
+     * Enables dots
+     */
+    function setupDots (dotContainerClass) {
+        var dot_count         = slideContainer.children.length;
+        var dot_container     = slider.getElementsByClassName(dotContainerClass)[0];
+        var dot_list_item     = document.createElement('li');
+
+        function handleDotEvent( e ) {
+            if (e.type === 'before.lory.init') {
+                dot_container.innerHTML = ''
+                for (var i = 0, len = dot_count; i < len; i++) {
+                    var clone = dot_list_item.cloneNode();
+                    dot_container.appendChild(clone);
+                }
+                dot_container.childNodes[0].classList.add('active');
+            }
+            if (e.type === 'after.lory.init') {
+                for (var i = 0, len = dot_count; i < len; i++) {
+                    dot_container.childNodes[i].addEventListener('click', function(e) {
+                        slideTo(Array.prototype.indexOf.call(dot_container.childNodes, e.target));
+                    });
+                }
+            }
+            if (e.type === 'after.lory.slide') {
+                for (var i = 0, len = dot_container.childNodes.length; i < len; i++) {
+                    dot_container.childNodes[i].classList.remove('active');
+                }
+                dot_container.childNodes[e.detail.currentSlide].classList.add('active');
+            }
+            if (e.type === 'on.lory.resize') {
+                for (var i = 0, len = dot_container.childNodes.length; i < len; i++) {
+                    dot_container.childNodes[i].classList.remove('active');
+                }
+                dot_container.childNodes[0].classList.add('active');
+            }
+        }
+        slider.addEventListener('before.lory.init', handleDotEvent);
+        slider.addEventListener('after.lory.init', handleDotEvent);
+        slider.addEventListener('after.lory.slide', handleDotEvent);
+        slider.addEventListener('on.lory.resize', handleDotEvent);
+    }
+
+    /**
      * [dispatchSliderEvent description]
      * @return {[type]} [description]
      */
@@ -257,7 +300,8 @@ export function lory (slider, opts) {
             classNamePrevCtrl,
             classNameNextCtrl,
             enableMouseEvents,
-            classNameActiveSlide
+            classNameActiveSlide,
+            classNameDotContainer
         } = options;
 
         frame = slider.getElementsByClassName(classNameFrame)[0];
@@ -286,6 +330,10 @@ export function lory (slider, opts) {
             if (nextCtrl && (slides.length === 1) && !options.rewind) {
                 nextCtrl.classList.add('disabled');
             }
+        }
+
+        if (classNameDotContainer) {
+            setupDots(classNameDotContainer);
         }
 
         reset();
