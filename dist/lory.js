@@ -106,6 +106,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var index = 0;
 	    var options = {};
 	
+	    var autoAdvanceTimeout = void 0;
+	
 	    /**
 	     * if object is jQuery convert to native DOM element
 	     */
@@ -161,24 +163,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        slideContainer.addEventListener(prefixes.transitionEnd, onTransitionEnd);
 	
 	        return slice.call(slideContainer.children);
-	    }
-	
-	    /**
-	     * Enables auto advance behaviour
-	     */
-	    function setupAutoAdvance(speed) {
-	        var slideTimer = void 0;
-	        var onSlide = slider.addEventListener("after.lory.slide", function () {
-	            clearTimeout(slideTimer);
-	            // Change these values to change the slider direction and delay.
-	            slideTimer = setTimeout(next, speed);
-	        });
-	        var onDestroy = slider.addEventListener("on.lory.destroy", function () {
-	            clearTimeout(slideTimer);
-	            slider.removeEventListener(onSlide);
-	            slider.removeEventListener(onDestroy);
-	        });
-	        slideTo(0);
 	    }
 	
 	    /**
@@ -365,6 +349,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            nextCtrl.classList.add('disabled');
 	        }
 	
+	        if (options.autoAdvance) {
+	            clearTimeout(autoAdvanceTimeout);
+	            // Change these values to change the slider direction and delay.
+	            autoAdvanceTimeout = setTimeout(next, options.autoAdvance);
+	        }
+	
 	        dispatchSliderEvent('after', 'slide', {
 	            currentSlide: index
 	        });
@@ -443,7 +433,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        options.window.addEventListener('resize', onResize);
 	
 	        if (options.autoAdvance) {
-	            setupAutoAdvance(options.autoAdvance);
+	            slideTo(0);
 	        }
 	
 	        dispatchSliderEvent('after', 'init');
@@ -559,6 +549,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                slideContainer.removeChild(slideContainer.firstChild);
 	                slideContainer.removeChild(slideContainer.lastChild);
 	            });
+	        }
+	
+	        if (options.autoAdvance) {
+	            clearTimeout(autoAdvanceTimeout);
 	        }
 	
 	        dispatchSliderEvent('after', 'destroy');

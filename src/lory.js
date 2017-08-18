@@ -25,6 +25,8 @@ export function lory (slider, opts) {
     let index   = 0;
     let options = {};
 
+    let autoAdvanceTimeout;
+
     /**
      * if object is jQuery convert to native DOM element
      */
@@ -77,26 +79,6 @@ export function lory (slider, opts) {
         slideContainer.addEventListener(prefixes.transitionEnd, onTransitionEnd);
 
         return slice.call(slideContainer.children);
-    }
-
-    /**
-     * Enables auto advance behaviour
-     */
-    function setupAutoAdvance (speed) {
-        let slideTimer
-        let onSlide = () => {
-            clearTimeout(slideTimer);
-            // Change these values to change the slider direction and delay.
-            slideTimer = setTimeout(next, speed);
-        };
-        let onDestroy = () => {
-            clearTimeout(slideTimer);
-            slider.removeEventListener("after.lory.slide", onSlide);
-            slider.removeEventListener("on.lory.destroy", onDestroy);
-        };
-        slider.addEventListener("after.lory.slide", onSlide);
-        slider.addEventListener("on.lory.destroy", onDestroy);
-        slideTo(0);
     }
 
     /**
@@ -283,6 +265,12 @@ export function lory (slider, opts) {
             nextCtrl.classList.add('disabled');
         }
 
+        if (options.autoAdvance) {
+            clearTimeout(autoAdvanceTimeout);
+            // Change these values to change the slider direction and delay.
+            autoAdvanceTimeout = setTimeout(next, options.autoAdvance);
+        }
+
         dispatchSliderEvent('after', 'slide', {
             currentSlide: index
         });
@@ -361,7 +349,7 @@ export function lory (slider, opts) {
         options.window.addEventListener('resize', onResize);
 
         if (options.autoAdvance) {
-            setupAutoAdvance(options.autoAdvance);
+            slideTo(0);
         }
 
         dispatchSliderEvent('after', 'init');
@@ -473,6 +461,10 @@ export function lory (slider, opts) {
                 slideContainer.removeChild(slideContainer.firstChild);
                 slideContainer.removeChild(slideContainer.lastChild);
             });
+        }
+
+        if (options.autoAdvance) {
+            clearTimeout(autoAdvanceTimeout);
         }
 
         dispatchSliderEvent('after', 'destroy');
