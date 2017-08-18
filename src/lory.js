@@ -84,16 +84,18 @@ export function lory (slider, opts) {
      */
     function setupAutoAdvance (speed) {
         let slideTimer
-        let onSlide = slider.addEventListener("after.lory.slide", () => {
+        let onSlide = () => {
             clearTimeout(slideTimer);
             // Change these values to change the slider direction and delay.
             slideTimer = setTimeout(next, speed);
-        });
-        let onDestroy = slider.addEventListener("on.lory.destroy", () => {
+        };
+        let onDestroy = () => {
             clearTimeout(slideTimer);
-            slider.removeEventListener(onSlide);
-            slider.removeEventListener(onDestroy);
-        });
+            slider.removeEventListener("after.lory.slide", onSlide);
+            slider.removeEventListener("on.lory.destroy", onDestroy);
+        };
+        slider.addEventListener("after.lory.slide", onSlide);
+        slider.addEventListener("on.lory.destroy", onDestroy);
         slideTo(0);
     }
 
