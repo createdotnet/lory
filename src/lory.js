@@ -80,6 +80,22 @@ export function lory (slider, opts) {
     }
 
     /**
+     * Enables auto advance behaviour
+     */
+    function setupAutoAdvance (speed) {
+        let slideTimer
+        slider.addEventListener("after.lory.slide", () => {
+            clearTimeout(slideTimer);
+            // Change these values to change the slider direction and delay.
+            slideTimer = setTimeout(next, speed);
+        });
+        slider.addEventListener("on.lory.destroy", () => {
+            clearTimeout(slideTimer);
+        });
+        slideTo(0);
+    }
+
+    /**
      * [dispatchSliderEvent description]
      * @return {[type]} [description]
      */
@@ -254,6 +270,10 @@ export function lory (slider, opts) {
             y: slideContainer.offsetTop
         };
 
+        if (options.autoAdvance) {
+            options.infinite = true;
+        }
+
         if (options.infinite) {
             slides = setupInfinite(slice.call(slideContainer.children));
         } else {
@@ -287,6 +307,10 @@ export function lory (slider, opts) {
         }
 
         options.window.addEventListener('resize', onResize);
+
+        if (options.autoAdvance) {
+            setupAutoAdvance(options.autoAdvance);
+        }
 
         dispatchSliderEvent('after', 'init');
     }

@@ -164,6 +164,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
+	     * Enables auto advance behaviour
+	     */
+	    function setupAutoAdvance(speed) {
+	        var slideTimer = void 0;
+	        slider.addEventListener("after.lory.slide", function () {
+	            clearTimeout(slideTimer);
+	            // Change these values to change the slider direction and delay.
+	            slideTimer = setTimeout(next, speed);
+	        });
+	        slider.addEventListener("on.lory.destroy", function () {
+	            clearTimeout(slideTimer);
+	        });
+	        slideTo(0);
+	    }
+	
+	    /**
 	     * [dispatchSliderEvent description]
 	     * @return {[type]} [description]
 	     */
@@ -338,6 +354,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            y: slideContainer.offsetTop
 	        };
 	
+	        if (options.autoAdvance) {
+	            options.infinite = true;
+	        }
+	
 	        if (options.infinite) {
 	            slides = setupInfinite(slice.call(slideContainer.children));
 	        } else {
@@ -371,6 +391,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	
 	        options.window.addEventListener('resize', onResize);
+	
+	        if (options.autoAdvance) {
+	            setupAutoAdvance(options.autoAdvance);
+	        }
 	
 	        dispatchSliderEvent('after', 'init');
 	    }
