@@ -187,13 +187,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    function setupAutoAdvance(speed) {
 	        var slideTimer = void 0;
-	        slider.addEventListener("after.lory.slide", function () {
+	        var onSlide = slider.addEventListener("after.lory.slide", function () {
 	            clearTimeout(slideTimer);
 	            // Change these values to change the slider direction and delay.
 	            slideTimer = setTimeout(next, speed);
 	        });
-	        slider.addEventListener("on.lory.destroy", function () {
+	        var onDestroy = slider.addEventListener("on.lory.destroy", function () {
 	            clearTimeout(slideTimer);
+	            slider.removeEventListener(onSlide);
+	            slider.removeEventListener(onDestroy);
 	        });
 	        slideTo(0);
 	    }
