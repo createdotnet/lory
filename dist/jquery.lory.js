@@ -380,14 +380,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            dotContainer = slider.getElementsByClassName(classNameDotContainer)[0];
 	
 	            dotContainer.innerHTML = '';
-	            console.log(slice.call(slideContainer.children).length);
-	            console.log(dotContainer);
 	            for (var i = 0, len = slice.call(slideContainer.children).length; i < len; i++) {
 	                var dot = document.createElement('li');
 	                // Use function to make event listener so `i` becomes immutable
 	                (function (_i) {
 	                    dot.addEventListener('click', function (e) {
-	                        console.log('sliding to ' + _i);
 	                        slideTo(_i);
 	                    });
 	                })(i + (options.infinite || 0));
