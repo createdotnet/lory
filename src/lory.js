@@ -19,6 +19,7 @@ export function lory (slider, opts) {
     let slideContainer;
     let prevCtrl;
     let nextCtrl;
+    let dotContainer;
     let prefixes;
     let transitionEndCallback;
 
@@ -79,49 +80,6 @@ export function lory (slider, opts) {
         slideContainer.addEventListener(prefixes.transitionEnd, onTransitionEnd);
 
         return slice.call(slideContainer.children);
-    }
-
-    /**
-     * Enables dots
-     */
-    function setupDots (dotContainerClass) {
-        var dot_count         = slideContainer.children.length;
-        var dot_container     = slider.getElementsByClassName(dotContainerClass)[0];
-        var dot_list_item     = document.createElement('li');
-
-        function handleDotEvent( e ) {
-            if (e.type === 'before.lory.init') {
-                dot_container.innerHTML = ''
-                for (var i = 0, len = dot_count; i < len; i++) {
-                    var clone = dot_list_item.cloneNode();
-                    dot_container.appendChild(clone);
-                }
-                dot_container.childNodes[0].classList.add('active');
-            }
-            if (e.type === 'after.lory.init') {
-                for (var i = 0, len = dot_count; i < len; i++) {
-                    dot_container.childNodes[i].addEventListener('click', function(e) {
-                        slideTo(Array.prototype.indexOf.call(dot_container.childNodes, e.target));
-                    });
-                }
-            }
-            if (e.type === 'after.lory.slide') {
-                for (var i = 0, len = dot_container.childNodes.length; i < len; i++) {
-                    dot_container.childNodes[i].classList.remove('active');
-                }
-                dot_container.childNodes[e.detail.currentSlide].classList.add('active');
-            }
-            if (e.type === 'on.lory.resize') {
-                for (var i = 0, len = dot_container.childNodes.length; i < len; i++) {
-                    dot_container.childNodes[i].classList.remove('active');
-                }
-                dot_container.childNodes[0].classList.add('active');
-            }
-        }
-        slider.addEventListener('before.lory.init', handleDotEvent);
-        slider.addEventListener('after.lory.init', handleDotEvent);
-        slider.addEventListener('after.lory.slide', handleDotEvent);
-        slider.addEventListener('on.lory.resize', handleDotEvent);
     }
 
     /**
@@ -199,12 +157,13 @@ export function lory (slider, opts) {
             } else {
                 nextIndex = index - slidesToScroll;
             }
-        }
 
-        nextIndex = Math.min(Math.max(nextIndex, 0), slides.length - 1);
-
-        if (infinite && direction === undefined) {
-            nextIndex += infinite;
+            nextIndex = Math.min(Math.max(nextIndex, 0), slides.length - 1);
+            if (infinite && direction === undefined) {
+                nextIndex += infinite;
+            }
+        } else {
+            nextIndex = Math.min(Math.max(nextIndex, 0), slides.length - 1);
         }
 
         let nextOffset = Math.min(Math.max(slides[nextIndex].offsetLeft * -1, maxOffset * -1), 0);
@@ -271,6 +230,9 @@ export function lory (slider, opts) {
             autoAdvanceTimeout = setTimeout(next, options.autoAdvance);
         }
 
+        if (options.classNameDotContainer) {
+            setActiveDot(index);
+        }
         dispatchSliderEvent('after', 'slide', {
             currentSlide: index
         });
@@ -307,7 +269,30 @@ export function lory (slider, opts) {
         };
 
         if (options.autoAdvance) {
-            options.infinite = true;
+            options.rewind = false
+            options.infinite = options.infinite || 1;
+        }
+
+        if (classNameDotContainer) {
+            dotContainer = slider.getElementsByClassName(classNameDotContainer)[0];
+
+            dotContainer.innerHTML = ''
+            console.log(slice.call(slideContainer.children).length)
+            console.log(dotContainer)
+            for (var i = 0, len = slice.call(slideContainer.children).length; i < len; i++) {
+                var dot = document.createElement('li');
+                // Use function to make event listener so `i` becomes immutable
+                (function(_i) {
+                    dot.addEventListener('click', function(e) {
+                        console.log('sliding to ' + _i);
+                        slideTo(_i);
+                    });
+                })(i + (options.infinite || 0))
+                dotContainer.appendChild(dot);
+            }
+            dotContainer.childNodes[0].classList.add('active');
+        } else if (dotContainer) {
+            dotContainer.innerHTML = '';
         }
 
         if (options.infinite) {
@@ -322,10 +307,6 @@ export function lory (slider, opts) {
             if (nextCtrl && (slides.length === 1) && !options.rewind) {
                 nextCtrl.classList.add('disabled');
             }
-        }
-
-        if (classNameDotContainer) {
-            setupDots(classNameDotContainer);
         }
 
         reset();
@@ -604,9 +585,22 @@ export function lory (slider, opts) {
         }
     }
 
+    function setActiveDot (dotIndex) {
+        let nDots = dotContainer.childNodes.length;
+        for (var i = 0, len = nDots; i < len; i++) {
+            dotContainer.childNodes[i].classList.remove('active');
+        }
+        dotIndex -= (options.infinite || 0)
+        if (dotIndex < nDots) {
+            dotContainer.childNodes[dotIndex].classList.add('active');
+        }
+    }
+
     function onResize (event) {
         reset();
-
+        if (options.classNameDotContainer) {
+            setActiveDot(0);
+        }
         dispatchSliderEvent('on', 'resize', {
             event
         });
