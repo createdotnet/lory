@@ -249,7 +249,7 @@ export function lory (slider, opts) {
 
 		prefixes = detectPrefixes();
 		options = {...defaults, ...opts};
-		options = {...options, updatedOptions};
+		options = {...options, ...updatedOptions};
 
 		const {
 			classNameFrame,
