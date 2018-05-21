@@ -347,7 +347,7 @@ export function lory (slider, opts) {
 		options.window.addEventListener('resize', onResize);
 
 		if (options.autoAdvance) {
-			slideTo(0);
+			slideTo(options.infinite);
 		}
 
 		dispatchSliderEvent('after', 'init');
